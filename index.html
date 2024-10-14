@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleWebComponent</title>
+    <script>
+    class PopupInfo extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({ mode: 'open' });
+
+            const template = document.createElement('template');
+            template.innerHTML = `
+            <style>
+                :host {
+                position: relative;
+                display: inline-block;
+                cursor: pointer;
+                }
+                .popup-content {
+                display: none;
+                position: absolute;
+                background-color: white;
+                border: 1px solid #ccc;
+                padding: 10px;
+                z-index: 10;
+                top: 100%;
+                left: 0;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                white-space: nowrap;
+                }
+                .popup-content.show {
+                display: block;
+                }
+            </style>
+            <slot name="trigger"></slot>
+            <div class="popup-content">
+                <slot name="content"></slot>
+            </div>
+            `;
+            
+            this.shadowRoot.appendChild(template.content.cloneNode(true));
+
+            // イベントリスナーの追加
+            this.triggerElement = this.shadowRoot.querySelector('slot[name="trigger"]');
+            this.popupContent = this.shadowRoot.querySelector('.popup-content');
+            
+            // トリガーのクリックで表示/非表示を切り替え
+            this.triggerElement.addEventListener('click', this.togglePopup.bind(this));
+        }
+
+        // ポップアップを表示/非表示にするメソッド
+        togglePopup() {
+            this.popupContent.classList.toggle('show');
+        }
+
+        // Web Component が DOM に追加された時に呼ばれる
+        connectedCallback() {
+            console.log('PopupInfo added to the page.');
+        }
+
+        // Web Component が DOM から削除された時に呼ばれる
+        disconnectedCallback() {
+            console.log('PopupInfo removed from the page.');
+        }
+    }
+
+customElements.define('popup-info', PopupInfo);
+    </script>
+</head>
+<body>
+    <popup-info>
+        <button slot="trigger">クリックして詳細を表示</button>
+        <div slot="content">ポップアップの中身です。</div>
+    </popup-info>      
+</body>
+</html>
